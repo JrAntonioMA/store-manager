@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useAuthStore } from "../store/authStore";
+import { useAuthStore } from "../../../store/authStore";
+import { useNavigate } from "react-router-dom";
 
 export const useLogin = () => {
     const [usuario, setUsuario] = useState("");
@@ -8,12 +9,15 @@ export const useLogin = () => {
     const [cargando, setCargando] = useState(false);
 
     const iniciarSesion = useAuthStore((state) => state.iniciarSesion);
+    const navigate = useNavigate();
+
+    const esValido = usuario.trim() !== "" && contrasena.trim() !== "";
 
     const manejarLogin = async (e) => {
         e.preventDefault();
         setError("");
 
-        if (!usuario.trim() || !contrasena.trim()) {
+        if (!esValido) {
             setError("Por favor, completa todos los campos");
             return;
         }
@@ -24,6 +28,7 @@ export const useLogin = () => {
                 username: usuario,
                 password: contrasena,
             });
+            navigate("/");
         } catch (err) {
             setError("Error al iniciar sesión, verifica tus credenciales");
         } finally {
@@ -33,11 +38,7 @@ export const useLogin = () => {
 
     useEffect(() => {
         if (!error) return;
-
-        const timer = setTimeout(() => {
-            setError("");
-        }, 3000);
-
+        const timer = setTimeout(() => setError(""), 3000);
         return () => clearTimeout(timer);
     }, [error]);
 
@@ -54,6 +55,7 @@ export const useLogin = () => {
         contrasena,
         error,
         cargando,
+        esValido,
         setUsuario,
         setContrasena,
         manejarLogin,

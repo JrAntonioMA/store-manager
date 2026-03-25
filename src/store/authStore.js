@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { iniciarSesionRequest } from "../api/auth";
 
 export const useAuthStore = create((set) => ({
-    usuario: null,
+    usuario: JSON.parse(localStorage.getItem("usuario")) || null,
     token: localStorage.getItem("token") || null,
 
     iniciarSesion: async (credenciales) => {
@@ -10,6 +10,7 @@ export const useAuthStore = create((set) => ({
 
         localStorage.setItem("token", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("usuario", JSON.stringify(data));
 
         set({
             usuario: data,

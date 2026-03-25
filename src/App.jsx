@@ -1,7 +1,27 @@
+import { useEffect } from "react";
+import { SnackbarProvider, useSnackbar } from "notistack";
 import AppRouter from "./routes/AppRouter";
+import { establecerReferenciaSnackbar } from "./utils/toast";
+
+function AplicacionInterna() {
+  const { enqueueSnackbar } = useSnackbar();
+
+  useEffect(() => {
+    establecerReferenciaSnackbar(enqueueSnackbar);
+  }, [enqueueSnackbar]);
+
+  return <AppRouter />;
+}
 
 function App() {
-  return <AppRouter />;
+  return (
+    <SnackbarProvider
+      maxSnack={3}
+      anchorOrigin={{ vertical: "abajo", horizontal: "derecha" }}
+    >
+      <AplicacionInterna />
+    </SnackbarProvider>
+  );
 }
 
 export default App;

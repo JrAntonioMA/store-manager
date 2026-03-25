@@ -7,7 +7,7 @@ import {
     CircularProgress,
     Alert,
 } from "@mui/material";
-import { useLogin } from "../hooks/useLogin";
+import { useLogin } from "../hook/useLogin";
 
 function Login() {
     const {
@@ -15,6 +15,7 @@ function Login() {
         contrasena,
         error,
         cargando,
+        esValido,
         setUsuario,
         setContrasena,
         manejarLogin,
@@ -219,7 +220,7 @@ function Login() {
                             type="submit"
                             variant="contained"
                             fullWidth
-                            disabled={cargando}
+                            disabled={cargando || !esValido}
                             sx={{
                                 py: 1.2,
                                 bgcolor: "#f55449",
