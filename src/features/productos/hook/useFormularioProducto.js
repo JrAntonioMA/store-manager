@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useBlocker } from "react-router-dom";
 import { productoSchema } from "../../../utils/validations";
 import { usarCategorias } from "./useCategorias";
 import { usarMutacionesProducto } from "./useMutateProducto";
@@ -9,10 +10,13 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
     const esEdicion = !!producto;
     const { crear, actualizar } = usarMutacionesProducto();
     const { data: categorias, isLoading: categoriasCargando } = usarCategorias();
+
     const [dialogoBorradorAbierto, setDialogoBorradorAbierto] = useState(false);
     const [datosBorrador, setDatosBorrador] = useState(null);
+    const [dialogoSalidaAbierto, setDialogoSalidaAbierto] = useState(false);
+    const [bloqueadorActual, setBloqueadorActual] = useState(null);
+
     const debounceTimer = useRef(null);
-    const [forceRender, setForceRender] = useState(0);
 
     const form = useForm({
         resolver: zodResolver(productoSchema),
@@ -37,14 +41,14 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
     const precio = form.watch("price") || 0;
     const descuento = form.watch("discountPercentage") || 0;
     const estadoDisponibilidad = form.watch("availabilityStatus");
+    const categoriaActual = form.watch("category");
+
     const precioFinal = precio * (1 - descuento / 100);
     const advertenciaDescuento = descuento > 50;
     const stockDeshabilitado = estadoDisponibilidad === "out-of-stock";
 
     useEffect(() => {
-        if (alCambioSinGuardar) {
-            alCambioSinGuardar(form.formState.isDirty);
-        }
+        if (alCambioSinGuardar) alCambioSinGuardar(form.formState.isDirty);
     }, [form.formState.isDirty, alCambioSinGuardar]);
 
     useEffect(() => {
@@ -57,46 +61,53 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
             }, 30000);
         });
         return () => {
-            if (debounceTimer.current) clearTimeout(debounceTimer.current);
+            clearTimeout(debounceTimer.current);
             if (form.formState.isDirty) {
-                const currentValues = form.getValues();
-                localStorage.setItem("productoBorrador", JSON.stringify(currentValues));
+                localStorage.setItem("productoBorrador", JSON.stringify(form.getValues()));
             }
             subscription.unsubscribe();
         };
-    }, [form, form.formState.isDirty]);
+    }, [form]);
 
     useEffect(() => {
         if (producto) {
-            form.reset({
-                title: producto.title,
-                category: producto.category,
-                price: producto.price,
-                stock: producto.stock,
+            const valores = {
+                title: producto.title || "",
+                category: producto.category || "",
+                price: producto.price ?? 0,
+                stock: producto.stock ?? 0,
                 discountPercentage: producto.discountPercentage ?? 0,
-                availabilityStatus: producto.availabilityStatus,
+                availabilityStatus: producto.availabilityStatus || "in-stock",
                 variants: producto.variants || [{ name: "", price: 0, stock: 0 }],
-            });
+            };
+            form.reset(valores);
+            form.trigger();
         }
-    }, [producto, form.reset]);
+    }, [producto, form]);
 
-    const categoriaAnterior = useRef(producto?.category);
+    const categoriaAnteriorRef = useRef(producto?.category);
+
     useEffect(() => {
-        const categoriaActual = form.watch("category");
-        if (categoriaAnterior.current && categoriaAnterior.current !== categoriaActual && !esEdicion) {
+        if (
+            categoriaAnteriorRef.current &&
+            categoriaAnteriorRef.current !== categoriaActual &&
+            !esEdicion
+        ) {
             replace([{ name: "", price: 0, stock: 0 }]);
+            form.trigger();
         }
-        categoriaAnterior.current = categoriaActual;
-    }, [form.watch("category"), replace, esEdicion]);
+        categoriaAnteriorRef.current = categoriaActual;
+    }, [categoriaActual, replace, esEdicion, form]);
 
     useEffect(() => {
         if (estadoDisponibilidad === "out-of-stock") {
-            if (form.watch("stock") !== 0) form.setValue("stock", 0);
+            form.setValue("stock", 0);
             fields.forEach((_, idx) => {
-                if (form.watch(`variants.${idx}.stock`) !== 0) form.setValue(`variants.${idx}.stock`, 0);
+                form.setValue(`variants.${idx}.stock`, 0);
             });
+            form.trigger();
         }
-    }, [estadoDisponibilidad, form.setValue, fields, form.watch]);
+    }, [estadoDisponibilidad, fields, form]);
 
     useEffect(() => {
         if (!esEdicion && !producto) {
@@ -115,37 +126,12 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
                     };
                     setDatosBorrador(borradorCompleto);
                     setDialogoBorradorAbierto(true);
-                } catch (error) {
+                } catch {
                     localStorage.removeItem("productoBorrador");
                 }
             }
         }
     }, [esEdicion, producto]);
-
-    const manejarRecuperarBorrador = () => {
-        if (datosBorrador) {
-            Object.entries(datosBorrador).forEach(([key, value]) => {
-                if (key === "variants") {
-                    replace(value);
-                } else {
-                    form.setValue(key, value, { shouldDirty: true });
-                }
-            });
-            setForceRender(prev => prev + 1);
-            setTimeout(() => {
-                setDialogoBorradorAbierto(false);
-                setDatosBorrador(null);
-            }, 100);
-        } else {
-            setDialogoBorradorAbierto(false);
-        }
-    };
-
-    const manejarCancelarBorrador = () => {
-        localStorage.removeItem("productoBorrador");
-        setDialogoBorradorAbierto(false);
-        setDatosBorrador(null);
-    };
 
     useEffect(() => {
         const manejarBeforeUnload = (e) => {
@@ -157,6 +143,35 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
         window.addEventListener("beforeunload", manejarBeforeUnload);
         return () => window.removeEventListener("beforeunload", manejarBeforeUnload);
     }, [form.formState.isDirty]);
+
+    const manejarRecuperarBorrador = () => {
+        if (datosBorrador) {
+            Object.entries(datosBorrador).forEach(([key, value]) => {
+                if (key === "variants") {
+                    replace(value);
+                } else {
+                    form.setValue(key, value, { shouldDirty: true });
+                }
+            });
+            form.trigger();
+            setDialogoBorradorAbierto(false);
+            setDatosBorrador(null);
+        }
+    };
+
+    const manejarCancelarBorrador = () => {
+        localStorage.removeItem("productoBorrador");
+        setDialogoBorradorAbierto(false);
+        setDatosBorrador(null);
+    };
+
+    const confirmarSalida = () => {
+        setDialogoSalidaAbierto(false);
+    };
+
+    const cancelarSalida = () => {
+        setDialogoSalidaAbierto(false);
+    };
 
     const onSubmit = async (datos) => {
         try {
@@ -173,7 +188,9 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
     };
 
     const tieneNombresVariantesDuplicados = () => {
-        const nombres = fields.map((_, idx) => form.watch(`variants.${idx}.name`)?.trim().toLowerCase()).filter(Boolean);
+        const nombres = fields
+            .map((_, idx) => form.watch(`variants.${idx}.name`)?.trim().toLowerCase())
+            .filter(Boolean);
         return nombres.length !== new Set(nombres).size;
     };
 
@@ -186,6 +203,9 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
             datosBorrador,
             manejarRecuperarBorrador,
             manejarCancelarBorrador,
+            salidaAbierto: dialogoSalidaAbierto,
+            confirmarSalida,
+            cancelarSalida,
         },
         estados: {
             esEdicion,
@@ -205,6 +225,5 @@ export const useFormularioProducto = ({ producto, alExito, alCambioSinGuardar })
         remove,
         tieneNombresVariantesDuplicados,
         onSubmit: form.handleSubmit(onSubmit),
-        forceRender, // Para posible uso en la UI, aunque no es necesario
     };
 };

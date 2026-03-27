@@ -1,195 +1,165 @@
-import React from "react";
-import {
-    Box,
-    Typography,
-    TextField,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    Paper,
-    IconButton,
-    Button,
-    CircularProgress,
-    TableCell,
-    TableSortLabel,
-    Alert,
-    InputAdornment,
-} from "@mui/material";
-import { Add, Edit, Delete, Search } from "@mui/icons-material";
+import { Container, Row, Col, Form, Button, InputGroup, Alert } from "react-bootstrap";
+import { Add, Edit, Delete, Search, TrendingUp, TrendingDown, Clear } from "@mui/icons-material";
 import TablaBase from "../../../components/TablaBase";
 import PaginacionTabla from "../../../components/PaginacionTabla";
 import ProductoModal from "../components/ProductoModal";
-import ConfirmDialog from "../components/ConfirmDialog";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 import { useGestionProductos } from "../hook/useGestionProductos";
 
 function Productos() {
     const {
-        textoBusqueda,
-        setTextoBusqueda,
-        categoriaSeleccionada,
-        setCategoriaSeleccionada,
-        productosFiltrados,
-        categorias,
-        cargando,
-        error,
-        total,
-        pagina,
-        limite,
-        ordenarPor,
-        direccionOrden,
-        modalAbierto,
-        productoEditar,
-        confirmacionAbierta,
-        productoAEliminar,
-        manejarOrden,
-        manejarNuevo,
-        manejarEditar,
-        manejarClickEliminar,
-        manejarConfirmarEliminar,
-        manejarCancelarEliminar,
-        manejarCerrarModal,
-        manejarCambiarPagina,
+        textoBusqueda, setTextoBusqueda,
+        categoriaSeleccionada, setCategoriaSeleccionada,
+        productosFiltrados, categorias,
+        cargando, error, total, pagina, limite,
+        ordenarPor, direccionOrden,
+        modalAbierto, productoEditar,
+        confirmacionAbierta, productoAEliminar,
+        ordenarRatingAsc, ordenarRatingDesc,
+        ordenarPrecioAsc, ordenarPrecioDesc,
+        ordenarStockAsc, ordenarStockDesc,
+        limpiarFiltros,
+        manejarNuevo, manejarEditar,
+        manejarClickEliminar, manejarConfirmarEliminar,
+        manejarCancelarEliminar, manejarCerrarModal,
+        manejarCambiarPagina, manejarCambiarFilasPorPagina,
     } = useGestionProductos();
 
     const renderFila = (producto) => (
         <>
-            <TableCell>{producto.title}</TableCell>
-            <TableCell>{producto.category}</TableCell>
-            <TableCell>${producto.price}</TableCell>
-            <TableCell>{producto.stock}</TableCell>
-            <TableCell>{producto.rating}</TableCell>
-            <TableCell>
-                <IconButton size="small" onClick={() => manejarEditar(producto)}>
+            <td>{producto.title}</td>
+            <td>{producto.category}</td>
+            <td>${producto.price.toFixed(2)}</td>
+            <td>{producto.stock}</td>
+            <td>{producto.rating}</td>
+            <td>
+                <Button variant="outline-primary" size="sm" onClick={() => manejarEditar(producto)} className="me-1">
                     <Edit fontSize="small" />
-                </IconButton>
-                <IconButton size="small" onClick={() => manejarClickEliminar(producto)}>
+                </Button>
+                <Button variant="outline-danger" size="sm" onClick={() => manejarClickEliminar(producto)}>
                     <Delete fontSize="small" />
-                </IconButton>
-            </TableCell>
+                </Button>
+            </td>
         </>
     );
 
-    if (cargando) {
-        return (
-            <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "50vh" }}>
-                <CircularProgress sx={{ color: "#f55449" }} />
-            </Box>
-        );
-    }
-
-    if (error) {
-        return (
-            <Box sx={{ p: 3 }}>
-                <Alert severity="error">Error al cargar productos. Intenta de nuevo.</Alert>
-            </Box>
-        );
-    }
+    const isActiveOrder = (campo, direccion) => ordenarPor === campo && direccionOrden === direccion;
 
     return (
-        <Box>
-            <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
-                <Typography variant="h5" fontWeight={600} sx={{ color: "#0f1f38" }}>
-                    Productos
-                </Typography>
-                <Button
-                    variant="contained"
-                    startIcon={<Add />}
-                    onClick={manejarNuevo}
-                    sx={{ bgcolor: "#f55449", "&:hover": { bgcolor: "#e04439" } }}
-                >
-                    Nuevo Producto
+        <Container fluid>
+            <div className="d-flex justify-content-end mb-4">
+                <Button variant="danger" onClick={manejarNuevo} style={{ backgroundColor: "#f55449", borderColor: "#f55449" }}>
+                    <Add className="me-1" /> Nuevo Producto
                 </Button>
-            </Box>
+            </div>
 
-            <Paper sx={{ p: 2, mb: 3, borderRadius: 3 }}>
-                <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-                    <TextField
-                        placeholder="Buscar productos..."
-                        variant="outlined"
-                        size="small"
-                        value={textoBusqueda}
-                        onChange={(e) => setTextoBusqueda(e.target.value)}
-                        sx={{ flexGrow: 1 }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <Search sx={{ color: "#8e7970", fontSize: "1.2rem" }} />
-                                </InputAdornment>
-                            ),
-                            sx: { borderRadius: 2 },
-                        }}
-                    />
-                    <FormControl size="small" sx={{ minWidth: 200 }}>
-                        <InputLabel>Categoría</InputLabel>
-                        <Select
+            <div className="bg-white p-3 rounded-3 border mb-4" style={{ borderRadius: "12px", borderColor: "#e0e4e8" }}>
+                <Row className="g-2">
+                    <Col md={6}>
+                        <InputGroup>
+                            <InputGroup.Text><Search style={{ color: "#8e7970" }} /></InputGroup.Text>
+                            <Form.Control
+                                type="text"
+                                placeholder="Buscar por nombre"
+                                value={textoBusqueda}
+                                onChange={(e) => setTextoBusqueda(e.target.value)}
+                            />
+                        </InputGroup>
+                    </Col>
+                    <Col md={4}>
+                        <Form.Select
                             value={categoriaSeleccionada}
-                            label="Categoría"
                             onChange={(e) => setCategoriaSeleccionada(e.target.value)}
+                            style={{ borderRadius: "8px" }}
                         >
-                            <MenuItem value="">Todas</MenuItem>
-                            {categorias?.map((cat) => (
-                                <MenuItem key={cat.slug} value={cat.slug}>
-                                    {cat.name}
-                                </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-                </Box>
-            </Paper>
+                            <option value="">Todas las categorías</option>
+                            {categorias?.map((c) => (<option key={c.slug} value={c.slug}>{c.name}</option>))}
+                        </Form.Select>
+                    </Col>
+                    <Col md={2}>
+                        <Button variant="outline-secondary" onClick={limpiarFiltros} className="w-100">
+                            <Clear /> Limpiar filtros
+                        </Button>
+                    </Col>
+                </Row>
+            </div>
+
+            <div className="bg-white p-3 rounded-3 border mb-4" style={{ borderRadius: "12px", borderColor: "#e0e4e8" }}>
+                <h6 className="text-center mb-3 fw-semibold" style={{ color: "#0f1f38" }}>Ordenar por</h6>
+                <div className="d-flex flex-wrap justify-content-center gap-4">
+                    <div className="text-center">
+                        <div className="small text-secondary">Rating</div>
+                        <div className="d-flex gap-1">
+                            <Button size="sm" variant={isActiveOrder("rating", "desc") ? "danger" : "outline-secondary"} onClick={ordenarRatingDesc}>
+                                <TrendingDown /> Mayor a menor
+                            </Button>
+                            <Button size="sm" variant={isActiveOrder("rating", "asc") ? "danger" : "outline-secondary"} onClick={ordenarRatingAsc}>
+                                <TrendingUp /> Menor a mayor
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="text-center">
+                        <div className="small text-secondary">Precio</div>
+                        <div className="d-flex gap-1">
+                            <Button size="sm" variant={isActiveOrder("price", "desc") ? "danger" : "outline-secondary"} onClick={ordenarPrecioDesc}>
+                                <TrendingDown /> Mayor a menor
+                            </Button>
+                            <Button size="sm" variant={isActiveOrder("price", "asc") ? "danger" : "outline-secondary"} onClick={ordenarPrecioAsc}>
+                                <TrendingUp /> Menor a mayor
+                            </Button>
+                        </div>
+                    </div>
+                    <div className="text-center">
+                        <div className="small text-secondary">Stock</div>
+                        <div className="d-flex gap-1">
+                            <Button size="sm" variant={isActiveOrder("stock", "desc") ? "danger" : "outline-secondary"} onClick={ordenarStockDesc}>
+                                <TrendingDown /> Mayor a menor
+                            </Button>
+                            <Button size="sm" variant={isActiveOrder("stock", "asc") ? "danger" : "outline-secondary"} onClick={ordenarStockAsc}>
+                                <TrendingUp /> Menor a mayor
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <TablaBase
-                columnas={[
-                    "Nombre",
-                    "Categoría",
-                    <TableSortLabel
-                        active={ordenarPor === "price"}
-                        direction={direccionOrden}
-                        onClick={() => manejarOrden("price")}
-                    >
-                        Precio
-                    </TableSortLabel>,
-                    "Stock",
-                    <TableSortLabel
-                        active={ordenarPor === "rating"}
-                        direction={direccionOrden}
-                        onClick={() => manejarOrden("rating")}
-                    >
-                        Rating
-                    </TableSortLabel>,
-                    "Acciones",
-                ]}
+                columnas={["Nombre", "Categoría", "Precio", "Stock", "Rating", "Acciones"]}
                 datos={productosFiltrados}
                 renderFila={renderFila}
-                mostrarNumeracion
                 pagina={pagina}
                 filasPorPagina={limite}
+                loading={cargando}
             />
 
-            <PaginacionTabla
-                total={total}
-                pagina={pagina}
-                filasPorPagina={limite}
-                onChangePagina={manejarCambiarPagina}
-                onChangeFilas={() => { }}
-            />
+            {!cargando && !error && productosFiltrados.length > 0 && (
+                <>
+                    <div className="text-secondary mb-2">{total} resultados</div>
+                    <PaginacionTabla
+                        total={total}
+                        pagina={pagina}
+                        filasPorPagina={limite}
+                        onChangePagina={manejarCambiarPagina}
+                        onChangeFilas={manejarCambiarFilasPorPagina}
+                    />
+                </>
+            )}
+
+            {error && <Alert variant="danger">Error al cargar productos. Intenta de nuevo.</Alert>}
+            {!cargando && !error && productosFiltrados.length === 0 && <Alert variant="info">No hay productos</Alert>}
 
             <ProductoModal
                 abierto={modalAbierto}
                 alCerrar={manejarCerrarModal}
                 producto={productoEditar}
             />
-
             <ConfirmDialog
                 abierto={confirmacionAbierta}
                 titulo="Eliminar producto"
-                mensaje={`¿Estás seguro de que deseas eliminar "${productoAEliminar?.title}"?`}
+                mensaje={`¿Eliminar "${productoAEliminar?.title}"?`}
                 alConfirmar={manejarConfirmarEliminar}
-                alCancelar={manejarCancelarEliminar}
-                textoConfirmar="Eliminar"
-                textoCancelar="Cancelar"
-            />
-        </Box>
+                alCancelar={manejarCancelarEliminar} />
+        </Container>
     );
 }
 

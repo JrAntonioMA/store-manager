@@ -1,17 +1,8 @@
-import {
-    Box,
-    List,
-    ListItem,
-    ListItemButton,
-    ListItemText,
-    Typography,
-    Divider,
-    Button,
-} from "@mui/material";
+import { Nav, Button } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 
-function Sidebar() {
+function Sidebar({ onItemClick }) {
     const navigate = useNavigate();
     const location = useLocation();
     const cerrarSesion = useAuthStore((state) => state.cerrarSesion);
@@ -21,89 +12,74 @@ function Sidebar() {
         window.location.href = "/login";
     };
 
+    const handleNavClick = (path) => {
+        navigate(path);
+        if (onItemClick) onItemClick();
+    };
+
     const menuItems = [
-        { text: "Inicio", path: "/" },
-        { text: "Productos", path: "/productos" },
+        { text: "Productos", path: "/" },
         { text: "Usuarios", path: "/usuarios" },
     ];
 
     return (
-        <Box
-            sx={{
-                height: "100%",
-                background: `linear-gradient(135deg, #0f1f38 0%, #1b4b5a 100%)`,
+        <div
+            className="d-flex flex-column h-100"
+            style={{
+                background: "linear-gradient(135deg, #0f1f38 0%, #1b4b5a 100%)",
                 color: "white",
-                display: "flex",
-                flexDirection: "column",
             }}
         >
-            {/* Logo */}
-            <Box sx={{ p: 3, textAlign: "center", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-                <Typography variant="h6" fontWeight={600}>
-                    Gestor de Tienda
-                </Typography>
-                <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                    Panel de administración
-                </Typography>
-            </Box>
+            <div className="p-3 text-center border-bottom" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
+                <h6 className="mb-0 fw-bold">Gestor de Tienda</h6>
+                <small className="opacity-75">Panel de administración</small>
+            </div>
 
-            {/* Menú */}
-            <List sx={{ flexGrow: 1, pt: 2 }}>
+            <Nav className="flex-column flex-grow-1 pt-2">
                 {menuItems.map((item) => {
                     const seleccionado = location.pathname === item.path;
-
                     return (
-                        <ListItem key={item.text} disablePadding>
-                            <ListItemButton
-                                selected={seleccionado}
-                                onClick={() => navigate(item.path)}
-                                sx={{
-                                    py: 1.5,
-                                    "&.Mui-selected": {
-                                        backgroundColor: "#f5544920",
-                                        borderRight: `3px solid #f55449`,
-                                        "&:hover": { backgroundColor: "#f5544930" },
-                                    },
-                                    "&:hover": { backgroundColor: "#ffffff10" },
-                                    color: "white",
-                                }}
-                            >
-                                <ListItemText
-                                    primary={item.text}
-                                    primaryTypographyProps={{
-                                        fontSize: "0.95rem",
-                                        fontWeight: seleccionado ? 600 : 400,
-                                    }}
-                                />
-                            </ListItemButton>
-                        </ListItem>
+                        <Nav.Link
+                            key={item.text}
+                            onClick={() => handleNavClick(item.path)}
+                            className={`py-2 px-3 ${seleccionado ? "active" : ""}`}
+                            style={{
+                                color: "white",
+                                backgroundColor: seleccionado ? "#f5544920" : "transparent",
+                                borderRight: seleccionado ? "3px solid #f55449" : "none",
+                                fontSize: "0.95rem",
+                                fontWeight: seleccionado ? 600 : 400,
+                            }}
+                        >
+                            {item.text}
+                        </Nav.Link>
                     );
                 })}
-            </List>
+            </Nav>
 
-            <Divider sx={{ bgcolor: "rgba(255,255,255,0.1)" }} />
-
-            {/* Cerrar sesión */}
-            <Box sx={{ p: 2 }}>
+            <div className="p-2">
                 <Button
-                    fullWidth
-                    variant="outlined"
+                    variant="outline-light"
+                    className="w-100"
                     onClick={manejarLogout}
-                    sx={{
-                        color: "white",
+                    style={{
                         borderColor: "rgba(255,255,255,0.3)",
-                        "&:hover": {
-                            borderColor: "#f55449",
-                            backgroundColor: "#f5544910",
-                        },
-                        textTransform: "none",
-                        py: 1,
+                        color: "white",
+                        transition: "all 0.2s",
+                    }}
+                    onMouseEnter={(e) => {
+                        e.target.style.borderColor = "#f55449";
+                        e.target.style.backgroundColor = "#f5544910";
+                    }}
+                    onMouseLeave={(e) => {
+                        e.target.style.borderColor = "rgba(255,255,255,0.3)";
+                        e.target.style.backgroundColor = "transparent";
                     }}
                 >
                     Cerrar sesión
                 </Button>
-            </Box>
-        </Box>
+            </div>
+        </div>
     );
 }
 

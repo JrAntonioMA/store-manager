@@ -1,69 +1,52 @@
 import { useState } from "react";
-import { Box, Drawer } from "@mui/material";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
+import { Offcanvas, Button } from "react-bootstrap";
 import { Outlet } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
 
-const anchoDrawer = 260;
-
-function Diseño() {
-    const [movilAbierto, setMovilAbierto] = useState(false);
-
+function Layout() {
+    const [showOffcanvas, setShowOffcanvas] = useState(false);
     const usuario = useAuthStore((state) => state.usuario);
-    const cerrarSesion = useAuthStore((state) => state.cerrarSesion);
-
-    const manejarAlternarDrawer = () => {
-        setMovilAbierto(!movilAbierto);
-    };
+    const handleClose = () => setShowOffcanvas(false);
+    const handleShow = () => setShowOffcanvas(true);
 
     return (
-        <Box sx={{ display: "flex", minHeight: "100vh", bgcolor: "#f5f7fc" }}>
+        <div className="d-flex min-vh-100 bg-light" style={{ backgroundColor: "#f5f7fc" }}>
+            <div
+                className="d-none d-md-block"
+                style={{
+                    width: "260px",
+                    position: "sticky",
+                    top: 0,
+                    alignSelf: "start",
+                    height: "100vh",
+                    overflowY: "auto",
+                }}
+            >
+                <Sidebar />
+            </div>
 
-            <Box component="nav" sx={{ width: { sm: anchoDrawer }, flexShrink: { sm: 0 } }}>
-                <Drawer
-                    variant="temporary"
-                    open={movilAbierto}
-                    onClose={manejarAlternarDrawer}
-                    ModalProps={{ keepMounted: true }}
-                    sx={{
-                        display: { xs: "block", sm: "none" },
-                        "& .MuiDrawer-paper": { width: anchoDrawer },
-                    }}
+            <div className="flex-grow-1" style={{ minWidth: 0 }}>
+                <Header onMenuClick={handleShow} usuario={usuario} />
+
+                <Offcanvas
+                    show={showOffcanvas}
+                    onHide={handleClose}
+                    placement="start"
+                    style={{ width: "260px" }}
                 >
-                    <Sidebar />
-                </Drawer>
+                    <Offcanvas.Body className="p-0">
+                        <Sidebar onItemClick={handleClose} />
+                    </Offcanvas.Body>
+                </Offcanvas>
 
-                <Drawer
-                    variant="permanent"
-                    sx={{
-                        display: { xs: "none", sm: "block" },
-                        "& .MuiDrawer-paper": { width: anchoDrawer },
-                    }}
-                    open
-                >
-                    <Sidebar />
-                </Drawer>
-            </Box>
-
-            <Box sx={{ flexGrow: 1 }}>
-
-                <Header
-                    onMenuClick={manejarAlternarDrawer}
-                    usuario={usuario}
-                />
-
-                <Box
-                    component="main"
-                    sx={{
-                        p: 3,
-                    }}
-                >
+                <main className="p-3 p-md-4">
                     <Outlet />
-                </Box>
-            </Box>
-        </Box>
+                </main>
+            </div>
+        </div>
     );
 }
 
-export default Diseño;
+export default Layout;

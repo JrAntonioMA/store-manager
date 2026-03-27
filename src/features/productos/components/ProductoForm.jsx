@@ -1,40 +1,10 @@
-import React from "react";
-import {
-    Box,
-    Button,
-    TextField,
-    Select,
-    MenuItem,
-    FormControl,
-    InputLabel,
-    FormHelperText,
-    Switch,
-    FormControlLabel,
-    Typography,
-    IconButton,
-    Alert,
-    CircularProgress,
-    Divider,
-    Paper,
-    Card,
-    CardContent,
-    InputAdornment,
-} from "@mui/material";
-import {
-    Add,
-    Delete,
-    Inventory,
-    Category,
-    AttachMoney,
-    Percent,
-    Sell,
-    Storefront,
-    Style,
-} from "@mui/icons-material";
-import ConfirmDialog from "../components/ConfirmDialog";
+import { Form, Button, Card, Alert, Spinner, InputGroup, Row, Col, Container } from "react-bootstrap";
+import { Add, Delete, Inventory, Category, AttachMoney, Percent, Sell, Storefront, Style } from "@mui/icons-material";
+import { Controller } from "react-hook-form";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 import { useFormularioProducto } from "../hook/useFormularioProducto";
 
-function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar }) {
+function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullWidth = false }) {
     const {
         form,
         categorias,
@@ -48,406 +18,384 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar }) {
         onSubmit,
     } = useFormularioProducto({ producto, alExito, alCambioSinGuardar });
 
-    const { register, setValue } = form;
+    const { control, register, setValue } = form;
     const { errors, isDirty, isValid, touchedFields } = estados;
-    const { borradorAbierto, manejarRecuperarBorrador, manejarCancelarBorrador } = dialogos;
+    const {
+        borradorAbierto,
+        manejarRecuperarBorrador,
+        manejarCancelarBorrador,
+        salidaAbierto,
+        confirmarSalida,
+        cancelarSalida,
+    } = dialogos;
 
-    const estilosInput = {
-        "& .MuiOutlinedInput-root": {
-            borderRadius: 2,
-            transition: "all 0.2s ease",
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#f55449", borderWidth: 2 },
-            "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#f55449" },
-        },
-        "& .MuiInputLabel-root.Mui-focused": { color: "#f55449" },
-    };
-
-    if (categoriasCargando) {
-        return (
-            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                <CircularProgress sx={{ color: "#f55449" }} />
-            </Box>
-        );
-    }
+    const wrapperStyle = fullWidth
+        ? { width: "100%", padding: 0 }
+        : { maxWidth: "800px", margin: "0 auto", padding: "2rem 0" };
 
     return (
-        <Box sx={{ maxWidth: 800, mx: "auto", py: 4 }}>
-            <Paper
-                elevation={2}
-                sx={{
-                    borderRadius: 4,
-                    overflow: "hidden",
-                    transition: "box-shadow 0.3s ease",
-                    "&:hover": { boxShadow: 6 },
-                }}
-            >
-                <Box
-                    sx={{
-                        px: 4,
-                        py: 3,
-                        background: `linear-gradient(135deg, #0f1f38 0%, #1a2c4a 100%)`,
+        <Container fluid className={fullWidth ? "p-0" : ""} style={wrapperStyle}>
+            <Card className="border-0 rounded-4 overflow-hidden shadow-lg">
+                <Card.Header
+                    className="p-4 border-0"
+                    style={{
+                        background: "linear-gradient(135deg, #0f1f38 0%, #1a2c4a 100%)",
                         color: "white",
                     }}
                 >
-                    <Typography variant="h5" fontWeight={600} sx={{ mb: 0.5 }}>
+                    <h5 className="mb-1 fw-bold">
                         {estados.esEdicion ? "Editar producto" : "Nuevo producto"}
-                    </Typography>
-                    <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                    </h5>
+                    <small className="opacity-75">
                         {estados.esEdicion
                             ? "Actualiza los datos del producto"
                             : "Completa la información para agregar un nuevo producto"}
-                    </Typography>
-                </Box>
+                    </small>
+                </Card.Header>
 
-                <Box sx={{ p: 4 }}>
-                    <form onSubmit={onSubmit}>
-                        <Box sx={{ display: "flex", flexDirection: "column", gap: 3, mb: 5 }}>
-                            <TextField
-                                fullWidth
-                                label="Nombre del producto *"
-                                {...register("title")}
-                                error={!!errors.title && touchedFields.title}
-                                helperText={touchedFields.title && errors.title?.message}
-                                variant="outlined"
-                                sx={estilosInput}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <Storefront sx={{ color: "#8e7970" }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+                <Card.Body className="p-4">
+                    {categoriasCargando ? (
+                        <div className="text-center py-4">
+                            <Spinner animation="border" style={{ color: "#f55449" }} />
+                        </div>
+                    ) : (
+                        <Form onSubmit={onSubmit}>
+                            <div className="mb-4">
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Nombre del producto *</Form.Label>
+                                    <InputGroup>
+                                        <InputGroup.Text className="bg-transparent border-end-0">
+                                            <Storefront style={{ color: "#8e7970" }} />
+                                        </InputGroup.Text>
+                                        <Form.Control
+                                            {...register("title")}
+                                            isInvalid={!!errors.title && touchedFields.title}
+                                            className="rounded-start-0"
+                                            style={{ borderRadius: "0 8px 8px 0" }}
+                                        />
+                                        <Form.Control.Feedback type="invalid">
+                                            {touchedFields.title && errors.title?.message}
+                                        </Form.Control.Feedback>
+                                    </InputGroup>
+                                </Form.Group>
 
-                            <FormControl fullWidth error={!!errors.category && touchedFields.category}>
-                                <InputLabel>Categoría *</InputLabel>
-                                <Select
-                                    label="Categoría *"
-                                    {...register("category")}
-                                    sx={{
-                                        borderRadius: 2,
-                                        "&.Mui-focused .MuiOutlinedInput-notchedOutline": { borderColor: "#f55449" },
-                                        "&:hover .MuiOutlinedInput-notchedOutline": { borderColor: "#f55449" },
-                                    }}
-                                    startAdornment={
-                                        <InputAdornment position="start">
-                                            <Category sx={{ color: "#8e7970", mr: 1 }} />
-                                        </InputAdornment>
-                                    }
-                                >
-                                    {categorias?.map((cat) => (
-                                        <MenuItem key={cat.slug} value={cat.slug}>
-                                            {cat.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                                <FormHelperText>{touchedFields.category && errors.category?.message}</FormHelperText>
-                            </FormControl>
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Categoría *</Form.Label>
+                                    <Controller
+                                        name="category"
+                                        control={control}
+                                        render={({ field, fieldState }) => (
+                                            <>
+                                                <InputGroup>
+                                                    <InputGroup.Text className="bg-transparent border-end-0">
+                                                        <Category style={{ color: "#8e7970" }} />
+                                                    </InputGroup.Text>
+                                                    <Form.Select
+                                                        {...field}
+                                                        isInvalid={!!fieldState.error}
+                                                        className="rounded-start-0"
+                                                        style={{ borderRadius: "0 8px 8px 0" }}
+                                                    >
+                                                        <option value="">Selecciona una categoría</option>
+                                                        {categorias?.map((cat) => (
+                                                            <option key={cat.slug} value={cat.slug}>
+                                                                {cat.name}
+                                                            </option>
+                                                        ))}
+                                                    </Form.Select>
+                                                </InputGroup>
+                                                <Form.Control.Feedback type="invalid">
+                                                    {fieldState.error?.message}
+                                                </Form.Control.Feedback>
+                                            </>
+                                        )}
+                                    />
+                                </Form.Group>
 
-                            <FormControlLabel
-                                control={
-                                    <Switch
+                                <Form.Group className="mb-3">
+                                    <Form.Check
+                                        type="switch"
+                                        id="availability-switch"
+                                        label={
+                                            estados.estadoDisponibilidad === "in-stock"
+                                                ? "Producto en venta"
+                                                : "Producto descontinuado"
+                                        }
                                         checked={estados.estadoDisponibilidad === "in-stock"}
                                         onChange={(e) =>
-                                            setValue("availabilityStatus", e.target.checked ? "in-stock" : "out-of-stock")
+                                            setValue(
+                                                "availabilityStatus",
+                                                e.target.checked ? "in-stock" : "out-of-stock"
+                                            )
                                         }
-                                        sx={{
-                                            "& .MuiSwitch-switchBase.Mui-checked": { color: "#f55449" },
-                                            "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": { backgroundColor: "#f55449" },
-                                        }}
+                                        className="text-dark"
+                                        style={{ color: "#0f1f38" }}
                                     />
-                                }
-                                label={
-                                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                                        {estados.estadoDisponibilidad === "in-stock" ? "Producto en venta" : "Producto descontinuado"}
-                                    </Typography>
-                                }
-                            />
+                                </Form.Group>
 
-                            <TextField
-                                fullWidth
-                                label="Precio base *"
-                                type="number"
-                                step="0.01"
-                                {...register("price", { valueAsNumber: true })}
-                                error={!!errors.price && touchedFields.price}
-                                helperText={touchedFields.price && errors.price?.message}
-                                variant="outlined"
-                                sx={estilosInput}
-                                inputProps={{ min: 0 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <AttachMoney sx={{ color: "#8e7970" }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Precio base *</Form.Label>
+                                    <InputGroup>
+                                        <InputGroup.Text className="bg-transparent border-end-0">
+                                            <AttachMoney style={{ color: "#8e7970" }} />
+                                        </InputGroup.Text>
+                                        <Form.Control
+                                            type="number"
+                                            step="0.01"
+                                            {...register("price", { valueAsNumber: true })}
+                                            isInvalid={!!errors.price && touchedFields.price}
+                                            className="rounded-start-0"
+                                            style={{ borderRadius: "0 8px 8px 0" }}
+                                        />
+                                        <Form.Control.Feedback type="invalid">
+                                            {touchedFields.price && errors.price?.message}
+                                        </Form.Control.Feedback>
+                                    </InputGroup>
+                                </Form.Group>
 
-                            <TextField
-                                fullWidth
-                                label="Stock total *"
-                                type="number"
-                                step={1}
-                                {...register("stock", { valueAsNumber: true })}
-                                error={!!errors.stock && touchedFields.stock}
-                                helperText={touchedFields.stock && errors.stock?.message}
-                                disabled={estados.stockDeshabilitado}
-                                variant="outlined"
-                                sx={estilosInput}
-                                inputProps={{ min: 0 }}
-                                InputProps={{
-                                    startAdornment: (
-                                        <InputAdornment position="start">
-                                            <Inventory sx={{ color: "#8e7970" }} />
-                                        </InputAdornment>
-                                    ),
-                                }}
-                            />
+                                <Form.Group className="mb-3">
+                                    <Form.Label>Stock total *</Form.Label>
+                                    <InputGroup>
+                                        <InputGroup.Text className="bg-transparent border-end-0">
+                                            <Inventory style={{ color: "#8e7970" }} />
+                                        </InputGroup.Text>
+                                        <Form.Control
+                                            type="number"
+                                            step="1"
+                                            {...register("stock", { valueAsNumber: true })}
+                                            isInvalid={!!errors.stock && touchedFields.stock}
+                                            disabled={estados.stockDeshabilitado}
+                                            className="rounded-start-0"
+                                            style={{ borderRadius: "0 8px 8px 0" }}
+                                        />
+                                        <Form.Control.Feedback type="invalid">
+                                            {touchedFields.stock && errors.stock?.message}
+                                        </Form.Control.Feedback>
+                                    </InputGroup>
+                                </Form.Group>
 
-                            <Box>
-                                <TextField
-                                    fullWidth
-                                    label="Descuento (%)"
-                                    type="number"
-                                    step="0.1"
-                                    {...register("discountPercentage", { valueAsNumber: true })}
-                                    error={!!errors.discountPercentage}
-                                    helperText={errors.discountPercentage?.message}
-                                    variant="outlined"
-                                    sx={estilosInput}
-                                    inputProps={{ min: 0, max: 100 }}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                <Percent sx={{ color: "#8e7970" }} />
-                                            </InputAdornment>
-                                        ),
+                                <div className="mb-3">
+                                    <Form.Label>Descuento (%)</Form.Label>
+                                    <InputGroup>
+                                        <InputGroup.Text className="bg-transparent border-end-0">
+                                            <Percent style={{ color: "#8e7970" }} />
+                                        </InputGroup.Text>
+                                        <Form.Control
+                                            type="number"
+                                            step="0.1"
+                                            {...register("discountPercentage", { valueAsNumber: true })}
+                                            isInvalid={!!errors.discountPercentage}
+                                            className="rounded-start-0"
+                                            style={{ borderRadius: "0 8px 8px 0" }}
+                                        />
+                                        <Form.Control.Feedback type="invalid">
+                                            {errors.discountPercentage?.message}
+                                        </Form.Control.Feedback>
+                                    </InputGroup>
+                                    {estados.advertenciaDescuento && (
+                                        <Alert variant="warning" className="mt-2 py-1">
+                                            Descuento superior al 50%
+                                        </Alert>
+                                    )}
+                                    <div
+                                        className="mt-3 p-3 bg-light rounded d-flex justify-content-between align-items-center"
+                                        style={{ border: "1px solid #e0e4e8" }}
+                                    >
+                                        <span className="text-secondary">Precio final</span>
+                                        <span className="h6 mb-0 fw-bold" style={{ color: "#f55449" }}>
+                                            ${estados.precioFinal.toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr className="my-4" style={{ borderColor: "#e0e4e8" }} />
+
+                            <div className="mb-4">
+                                <h6 className="fw-semibold mb-1" style={{ color: "#0f1f38" }}>
+                                    Variantes
+                                </h6>
+                                <small className="text-secondary">
+                                    Agrega variantes como tallas, colores, etc. (mínimo 1, máximo 5)
+                                </small>
+
+                                {fields.map((field, index) => (
+                                    <Card
+                                        key={field.id}
+                                        className="mb-3 shadow-sm border"
+                                        style={{ borderRadius: "12px", borderColor: "#e0e4e8" }}
+                                    >
+                                        <Card.Body className="p-3">
+                                            <div className="d-flex justify-content-end">
+                                                <Button
+                                                    variant="link"
+                                                    size="sm"
+                                                    className="text-danger p-0"
+                                                    onClick={() => remove(index)}
+                                                    disabled={fields.length === 1}
+                                                >
+                                                    <Delete fontSize="small" />
+                                                </Button>
+                                            </div>
+                                            <Row>
+                                                <Col md={12} className="mb-2">
+                                                    <Form.Group>
+                                                        <Form.Label>Nombre de la variante</Form.Label>
+                                                        <InputGroup>
+                                                            <InputGroup.Text className="bg-transparent border-end-0">
+                                                                <Style style={{ color: "#8e7970" }} />
+                                                            </InputGroup.Text>
+                                                            <Form.Control
+                                                                {...register(`variants.${index}.name`)}
+                                                                isInvalid={!!errors.variants?.[index]?.name}
+                                                                className="rounded-start-0"
+                                                                style={{ borderRadius: "0 8px 8px 0" }}
+                                                            />
+                                                            <Form.Control.Feedback type="invalid">
+                                                                {errors.variants?.[index]?.name?.message}
+                                                            </Form.Control.Feedback>
+                                                        </InputGroup>
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={6} className="mb-2">
+                                                    <Form.Group>
+                                                        <Form.Label>Precio</Form.Label>
+                                                        <InputGroup>
+                                                            <InputGroup.Text className="bg-transparent border-end-0">
+                                                                <Sell style={{ color: "#8e7970" }} />
+                                                            </InputGroup.Text>
+                                                            <Form.Control
+                                                                type="number"
+                                                                step="0.01"
+                                                                {...register(`variants.${index}.price`, {
+                                                                    valueAsNumber: true,
+                                                                })}
+                                                                isInvalid={
+                                                                    !!errors.variants?.[index]?.price
+                                                                }
+                                                                className="rounded-start-0"
+                                                                style={{ borderRadius: "0 8px 8px 0" }}
+                                                            />
+                                                            <Form.Control.Feedback type="invalid">
+                                                                {errors.variants?.[index]?.price?.message}
+                                                            </Form.Control.Feedback>
+                                                        </InputGroup>
+                                                    </Form.Group>
+                                                </Col>
+                                                <Col md={6}>
+                                                    <Form.Group>
+                                                        <Form.Label>Stock</Form.Label>
+                                                        <InputGroup>
+                                                            <InputGroup.Text className="bg-transparent border-end-0">
+                                                                <Inventory style={{ color: "#8e7970" }} />
+                                                            </InputGroup.Text>
+                                                            <Form.Control
+                                                                type="number"
+                                                                step="1"
+                                                                {...register(`variants.${index}.stock`, {
+                                                                    valueAsNumber: true,
+                                                                })}
+                                                                isInvalid={
+                                                                    !!errors.variants?.[index]?.stock
+                                                                }
+                                                                disabled={estados.stockDeshabilitado}
+                                                                className="rounded-start-0"
+                                                                style={{ borderRadius: "0 8px 8px 0" }}
+                                                            />
+                                                            <Form.Control.Feedback type="invalid">
+                                                                {errors.variants?.[index]?.stock?.message}
+                                                            </Form.Control.Feedback>
+                                                        </InputGroup>
+                                                    </Form.Group>
+                                                </Col>
+                                            </Row>
+                                        </Card.Body>
+                                    </Card>
+                                ))}
+
+                                <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    onClick={() => append({ name: "", price: 0, stock: 0 })}
+                                    disabled={fields.length >= 5}
+                                    className="mt-2"
+                                    style={{
+                                        borderColor: "#f55449",
+                                        color: "#f55449",
+                                        borderRadius: "8px",
                                     }}
-                                />
-                                {estados.advertenciaDescuento && (
-                                    <Alert severity="warning" sx={{ mt: 1, borderRadius: 2, py: 0 }}>
-                                        Descuento superior al 50%
+                                >
+                                    <Add fontSize="small" /> Agregar variante
+                                </Button>
+
+                                {tieneNombresVariantesDuplicados() && (
+                                    <Alert variant="danger" className="mt-3">
+                                        No puede haber dos variantes con el mismo nombre.
                                     </Alert>
                                 )}
+                                {errors.variants?.message && (
+                                    <Alert variant="danger" className="mt-3">
+                                        {errors.variants.message}
+                                    </Alert>
+                                )}
+                                {errors.stock?.message && (
+                                    <Alert variant="danger" className="mt-3">
+                                        {errors.stock.message}
+                                    </Alert>
+                                )}
+                            </div>
 
-                                <Box
-                                    sx={{
-                                        mt: 2,
-                                        p: 2,
-                                        bgcolor: "#fafbfc",
-                                        borderRadius: 2,
-                                        border: "1px solid #e0e4e8",
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                    }}
+                            <div className="d-flex justify-content-end gap-2">
+                                <Button
+                                    variant="secondary"
+                                    onClick={alCancelar}
+                                    className="px-4"
+                                    style={{ borderRadius: "8px" }}
                                 >
-                                    <Typography variant="body2" sx={{ color: "#8e7970" }}>
-                                        Precio final
-                                    </Typography>
-                                    <Typography variant="h6" sx={{ color: "#f55449", fontWeight: 600 }}>
-                                        ${estados.precioFinal.toFixed(2)}
-                                    </Typography>
-                                </Box>
-                            </Box>
-                        </Box>
-
-                        <Divider sx={{ my: 3, borderColor: "#e0e4e8" }} />
-
-                        <Box sx={{ mb: 3 }}>
-                            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1, color: "#0f1f38" }}>
-                                Variantes
-                            </Typography>
-                            <Typography variant="caption" sx={{ mb: 2, display: "block", color: "#8e7970" }}>
-                                Agrega variantes como tallas, colores, etc. (mínimo 1, máximo 5)
-                            </Typography>
-
-                            {fields.map((field, index) => (
-                                <Card
-                                    key={field.id}
-                                    variant="outlined"
-                                    sx={{
-                                        mb: 2,
-                                        borderRadius: 3,
-                                        borderColor: "#e0e4e8",
-                                        transition: "all 0.2s ease",
-                                        "&:hover": {
-                                            borderColor: "#f55449",
-                                            boxShadow: "0 4px 12px rgba(245,84,73,0.1)",
-                                        },
-                                    }}
-                                >
-                                    <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
-                                        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
-                                            <IconButton
-                                                onClick={() => remove(index)}
-                                                disabled={fields.length === 1}
-                                                sx={{ color: "#8e7970", "&:hover": { color: "#f55449" } }}
-                                                size="small"
-                                            >
-                                                <Delete fontSize="small" />
-                                            </IconButton>
-                                        </Box>
-                                        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                                            <TextField
-                                                fullWidth
-                                                label="Nombre de la variante"
-                                                {...register(`variants.${index}.name`)}
-                                                error={!!errors.variants?.[index]?.name}
-                                                helperText={errors.variants?.[index]?.name?.message}
-                                                variant="outlined"
-                                                size="small"
-                                                sx={estilosInput}
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <Style sx={{ color: "#8e7970" }} />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-
-                                            <TextField
-                                                fullWidth
-                                                label="Precio"
-                                                type="number"
-                                                step="0.01"
-                                                {...register(`variants.${index}.price`, { valueAsNumber: true })}
-                                                error={!!errors.variants?.[index]?.price}
-                                                helperText={errors.variants?.[index]?.price?.message}
-                                                variant="outlined"
-                                                size="small"
-                                                sx={estilosInput}
-                                                inputProps={{ min: 0 }}
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <Sell sx={{ color: "#8e7970" }} />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-
-                                            <TextField
-                                                fullWidth
-                                                label="Stock"
-                                                type="number"
-                                                step={1}
-                                                {...register(`variants.${index}.stock`, { valueAsNumber: true })}
-                                                error={!!errors.variants?.[index]?.stock}
-                                                helperText={errors.variants?.[index]?.stock?.message}
-                                                disabled={estados.stockDeshabilitado}
-                                                variant="outlined"
-                                                size="small"
-                                                sx={estilosInput}
-                                                inputProps={{ min: 0 }}
-                                                InputProps={{
-                                                    startAdornment: (
-                                                        <InputAdornment position="start">
-                                                            <Inventory sx={{ color: "#8e7970" }} />
-                                                        </InputAdornment>
-                                                    ),
-                                                }}
-                                            />
-                                        </Box>
-                                    </CardContent>
-                                </Card>
-                            ))}
-
-                            <Button
-                                variant="outlined"
-                                startIcon={<Add />}
-                                onClick={() => append({ name: "", price: 0, stock: 0 })}
-                                disabled={fields.length >= 5}
-                                sx={{
-                                    mt: 1,
-                                    textTransform: "none",
-                                    borderColor: "#f55449",
-                                    color: "#f55449",
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                        borderColor: "#e04439",
-                                        backgroundColor: "#f5544910",
-                                        transform: "translateY(-1px)",
-                                    },
-                                    transition: "all 0.2s ease",
-                                }}
-                            >
-                                Agregar variante
-                            </Button>
-
-                            {tieneNombresVariantesDuplicados() && (
-                                <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
-                                    No puede haber dos variantes con el mismo nombre.
-                                </Alert>
-                            )}
-                            {errors.variants?.message && (
-                                <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
-                                    {errors.variants.message}
-                                </Alert>
-                            )}
-                            {errors.stock?.message && (
-                                <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
-                                    {errors.stock.message}
-                                </Alert>
-                            )}
-                        </Box>
-
-                        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 2, mt: 4 }}>
-                            <Button
-                                onClick={alCancelar}
-                                variant="outlined"
-                                sx={{
-                                    textTransform: "none",
-                                    borderColor: "#e0e4e8",
-                                    color: "#8e7970",
-                                    borderRadius: 2,
-                                    px: 3,
-                                    transition: "all 0.2s ease",
-                                    "&:hover": {
+                                    Cancelar
+                                </Button>
+                                <Button
+                                    type="submit"
+                                    variant="danger"
+                                    disabled={
+                                        !isValid ||
+                                        (estados.esEdicion && !isDirty) ||
+                                        tieneNombresVariantesDuplicados()
+                                    }
+                                    style={{
+                                        backgroundColor: "#f55449",
                                         borderColor: "#f55449",
-                                        backgroundColor: "#f5544910",
-                                        transform: "translateY(-1px)",
-                                    },
-                                }}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                type="submit"
-                                variant="contained"
-                                disabled={!isValid || (estados.esEdicion && !isDirty) || tieneNombresVariantesDuplicados()}
-                                sx={{
-                                    bgcolor: "#f55449",
-                                    "&:hover": {
-                                        bgcolor: "#e04439",
-                                        transform: "translateY(-1px)",
-                                        boxShadow: "0 4px 12px rgba(245,84,73,0.3)",
-                                    },
-                                    textTransform: "none",
-                                    borderRadius: 2,
-                                    px: 4,
-                                    transition: "all 0.2s ease",
-                                }}
-                            >
-                                {estados.esEdicion ? "Actualizar producto" : "Crear producto"}
-                            </Button>
-                        </Box>
-                    </form>
-                </Box>
-            </Paper>
+                                        borderRadius: "8px",
+                                    }}
+                                    className="px-4"
+                                >
+                                    {estados.esEdicion ? "Actualizar producto" : "Crear producto"}
+                                </Button>
+                            </div>
+                        </Form>
+                    )}
+                </Card.Body>
+            </Card>
 
             <ConfirmDialog
                 abierto={borradorAbierto}
                 titulo="Borrador guardado"
-                mensaje="Hay un borrador guardado. ¿Deseas recuperarlo?"
+                mensaje="Hay un borrador guardado ¿Deseas recuperarlo?"
                 alConfirmar={manejarRecuperarBorrador}
                 alCancelar={manejarCancelarBorrador}
                 textoConfirmar="Recuperar"
                 textoCancelar="Descartar"
             />
-        </Box>
+            <ConfirmDialog
+                abierto={salidaAbierto}
+                titulo="Cambios sin guardar"
+                mensaje="Tienes cambios sin guardar ¿Seguro que quieres salir?"
+                alConfirmar={confirmarSalida}
+                alCancelar={cancelarSalida}
+                textoConfirmar="Salir"
+                textoCancelar="Quedarme"
+            />
+        </Container>
     );
 }
 

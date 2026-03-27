@@ -1,95 +1,88 @@
-import { Box, Typography, IconButton, Avatar } from "@mui/material";
+import { useState } from "react";
+import { Navbar, Container, Button, Image } from "react-bootstrap";
 import { useLocation } from "react-router-dom";
 
 function Header({ onMenuClick, usuario }) {
     const location = useLocation();
     const userImage = usuario?.image;
-    const fallbackLetter = usuario?.firstName?.charAt(0) || "U";
+    const fallbackLetter = usuario?.firstName?.charAt(0)?.toUpperCase() || "U";
+    const [imagenError, setImagenError] = useState(false);
 
     const obtenerTituloPagina = () => {
         switch (location.pathname) {
-            case "/":
-                return "Inicio";
-            case "/productos":
-                return "Productos";
-            case "/usuarios":
-                return "Usuarios";
-            default:
-                return "Gestor de Tienda";
+            case "/": return "Productos";
+            case "/usuarios": return "Usuarios";
+            default: return "Gestor de Tienda";
         }
     };
 
     const tituloPagina = obtenerTituloPagina();
 
     return (
-        <Box
-            sx={{
-                height: 64,
-                bgcolor: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                px: 3,
-                boxShadow: "0 1px 4px rgba(0,0,0,0.08)",
-                position: "sticky",
-                top: 0,
-                zIndex: 1100,
-                borderBottom: "1px solid #e0e4e8",
-            }}
+        <Navbar
+            bg="white"
+            className="shadow-sm px-3 sticky-top"
+            style={{ borderBottom: "1px solid #e0e4e8", height: "64px" }}
         >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <IconButton
-                    onClick={onMenuClick}
-                    sx={{
-                        display: { xs: "inline-flex", sm: "none" },
-                        color: "#0f1f38",
-                        p: 0.5,
-                        "&:hover": { backgroundColor: "#f0f2f5" },
-                    }}
-                >
-                    ☰
-                </IconButton>
-                <Typography
-                    variant="h6"
-                    component="h1"
-                    sx={{
-                        fontSize: "1.25rem",
-                        fontWeight: 600,
-                        color: "#0f1f38",
-                    }}
-                >
-                    {tituloPagina}
-                </Typography>
-            </Box>
+            <Container fluid className="d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center gap-2">
+                    <Button
+                        variant="outline-secondary"
+                        className="d-md-none p-2"
+                        onClick={onMenuClick}
+                        style={{
+                            color: "#0f1f38",
+                            border: "none",
+                            fontSize: "1.5rem",
+                            lineHeight: 1,
+                            padding: "0.5rem",
+                        }}
+                    >
+                        ☰
+                    </Button>
+                    <Navbar.Brand className="fw-semibold" style={{ color: "#0f1f38", fontSize: "1.25rem" }}>
+                        {tituloPagina}
+                    </Navbar.Brand>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                    <span className="text-secondary">Hola, {usuario?.firstName || "Usuario"}</span>
 
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Typography
-                    variant="body2"
-                    sx={{
-                        color: "text.secondary",
-                        fontSize: "0.875rem",
-                        fontWeight: 400,
-                    }}
-                >
-                    Hola, {usuario?.firstName || "Usuario"}
-                </Typography>
-                <Avatar
-                    src={userImage}
-                    alt={usuario?.firstName || "Usuario"}
-                    sx={{
-                        bgcolor: userImage ? "transparent" : "#f55449",
-                        width: 36,
-                        height: 36,
-                        fontSize: "0.9rem",
-                        fontWeight: 500,
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    }}
-                    imgProps={{ onError: (e) => { e.target.style.display = 'none'; } }}
-                >
-                    {!userImage && fallbackLetter}
-                </Avatar>
-            </Box>
-        </Box>
+                    {userImage && !imagenError ? (
+                        <img
+                            src={userImage}
+                            alt={usuario?.firstName}
+                            width="36"
+                            height="36"
+                            className="rounded-circle"
+                            style={{
+                                objectFit: "cover",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                                border: "none"
+                            }}
+                            onError={() => setImagenError(true)}
+                        />
+                    ) : (
+                        <div
+                            style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: "50%",
+                                backgroundColor: "#f55449",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "white",
+                                fontWeight: 500,
+                                fontSize: "0.9rem",
+                                boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+                            }}
+                        >
+                            {fallbackLetter}
+                        </div>
+                    )}
+                </div>
+            </Container>
+        </Navbar>
     );
 }
 

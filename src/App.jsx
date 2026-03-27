@@ -4,24 +4,17 @@ import AppRouter from "./routes/AppRouter";
 import { establecerReferenciaSnackbar } from "./utils/toast";
 
 function AplicacionInterna() {
-  const { enqueueSnackbar } = useSnackbar();
-
-  useEffect(() => {
-    establecerReferenciaSnackbar(enqueueSnackbar);
-  }, [enqueueSnackbar]);
-
-  return <AppRouter />;
+    const { enqueueSnackbar } = useSnackbar();
+    useEffect(() => { establecerReferenciaSnackbar(enqueueSnackbar); }, [enqueueSnackbar]);
+    return <AppRouter />;
 }
 
 function App() {
-  return (
-    <SnackbarProvider
-      maxSnack={3}
-      anchorOrigin={{ vertical: "abajo", horizontal: "derecha" }}
-    >
-      <AplicacionInterna />
-    </SnackbarProvider>
-  );
+    return (
+        <SnackbarProvider maxSnack={3} anchorOrigin={{ vertical: "bottom", horizontal: "right" }}>
+            <AplicacionInterna />
+        </SnackbarProvider>
+    );
 }
 
 export default App;

@@ -1,12 +1,12 @@
-let referenciaEncolarSnackbar = null;
+let referenciaToast = null;
 
 export const establecerReferenciaSnackbar = (ref) => {
-    referenciaEncolarSnackbar = ref;
+    referenciaToast = ref;
 };
 
 export const mostrarNotificacion = (mensaje, variante = "info") => {
-    if (referenciaEncolarSnackbar) {
-        referenciaEncolarSnackbar(mensaje, { variant: variante });
+    if (referenciaToast) {
+        referenciaToast(mensaje, { variant: variante });
     } else {
         console.warn("Notificación no inicializada");
     }

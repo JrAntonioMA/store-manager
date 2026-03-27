@@ -8,6 +8,16 @@ export const obtenerProductos = async ({ limit = 10, skip = 0, q = "" }) => {
     return data;
 };
 
+export const obtenerProductosPorCategoria = async (category, { limit = 10, skip = 0 }) => {
+    const { data } = await api.get(`/products/category/${category}?limit=${limit}&skip=${skip}`);
+    return data;
+};
+
+export const obtenerTodosPorCategoria = async (category) => {
+    const { data } = await api.get(`/products/category/${category}`);
+    return data.products;
+};
+
 export const obtenerCategorias = async () => {
     const { data } = await api.get("/products/categories");
     return data;

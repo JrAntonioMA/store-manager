@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuthStore } from "../../../store/authStore";
 import { useNavigate } from "react-router-dom";
+import { mostrarNotificacion } from "../../../utils/toast";
 
 export const useLogin = () => {
     const [usuario, setUsuario] = useState("");
     const [contrasena, setContrasena] = useState("");
-    const [error, setError] = useState("");
     const [cargando, setCargando] = useState(false);
 
     const iniciarSesion = useAuthStore((state) => state.iniciarSesion);
@@ -15,10 +15,9 @@ export const useLogin = () => {
 
     const manejarLogin = async (e) => {
         e.preventDefault();
-        setError("");
 
         if (!esValido) {
-            setError("Por favor, completa todos los campos");
+            mostrarNotificacion("Por favor, completa todos los campos", "warning");
             return;
         }
 
@@ -28,32 +27,26 @@ export const useLogin = () => {
                 username: usuario,
                 password: contrasena,
             });
+            mostrarNotificacion("Inicio de sesión exitoso", "success");
             navigate("/");
         } catch (err) {
-            setError("Error al iniciar sesión, verifica tus credenciales");
+            mostrarNotificacion("Error al iniciar sesión, verifica tus credenciales", "error");
         } finally {
             setCargando(false);
         }
     };
 
-    useEffect(() => {
-        if (!error) return;
-        const timer = setTimeout(() => setError(""), 3000);
-        return () => clearTimeout(timer);
-    }, [error]);
-
     const manejarOlvideContrasena = () => {
-        console.log("Recuperar contraseña");
+        mostrarNotificacion("Función en desarrollo", "info");
     };
 
     const manejarCrearCuenta = () => {
-        console.log("Crear cuenta");
+        mostrarNotificacion("Función en desarrollo", "info");
     };
 
     return {
         usuario,
         contrasena,
-        error,
         cargando,
         esValido,
         setUsuario,

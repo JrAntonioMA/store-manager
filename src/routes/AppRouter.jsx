@@ -1,32 +1,31 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import Login from "../features/auth/pages/Login";
-import Dashboard from "../features/dashboard/pages/Dashboard";
 import Productos from "../features/productos/pages/Productos";
-import ProductoForm from "../features/productos/components/ProductoForm";
 import Usuario from "../features/usuarios/pages/Usuarios";
 import PrivateRoute from "./PrivateRoute";
 import Layout from "../layout/Layout";
 
-function AppRouter() {
-    return (
-        <BrowserRouter>
-            <Routes>
-                <Route path="/login" element={<Login />} />
+const router = createBrowserRouter([
+    {
+        path: "/login",
+        element: <Login />,
+    },
+    {
+        path: "/",
+        element: <PrivateRoute />,
+        children: [
+            {
+                element: <Layout />,
+                children: [
+                    { index: true, element: <Productos /> },
+                    { path: "productos", element: <Productos /> },
+                    { path: "usuarios", element: <Usuario /> },
+                ],
+            },
+        ],
+    },
+]);
 
-                <Route
-                    element={
-                        <PrivateRoute>
-                            <Layout />
-                        </PrivateRoute>
-                    }
-                >
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/productos" element={<Productos />} />
-                    <Route path="/usuarios" element={<Usuario />} />
-                </Route>
-            </Routes>
-        </BrowserRouter>
-    );
+export default function AppRouter() {
+    return <RouterProvider router={router} />;
 }
-
-export default AppRouter;
