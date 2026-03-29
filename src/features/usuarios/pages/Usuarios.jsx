@@ -1,5 +1,4 @@
 import { Container, Form, Button, InputGroup, Alert, Row, Col } from "react-bootstrap";
-import { ShoppingCart, Search } from "@mui/icons-material";
 import TablaBase from "../../../components/TablaBase";
 import PaginacionTabla from "../../../components/PaginacionTabla";
 import DrawerCarritos from "../components/DrawerCarritos";

@@ -1,5 +1,4 @@
 import { Container, Row, Col, Form, Button, InputGroup, Alert } from "react-bootstrap";
-import { Add, Edit, Delete, Search, TrendingUp, TrendingDown, Clear } from "@mui/icons-material";
 import TablaBase from "../../../components/TablaBase";
 import PaginacionTabla from "../../../components/PaginacionTabla";
 import ProductoModal from "../components/ProductoModal";

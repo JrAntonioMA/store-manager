@@ -1,5 +1,4 @@
 import { Form, Button, Card, Alert, Spinner, InputGroup, Row, Col, Container } from "react-bootstrap";
-import { Add, Delete, Inventory, Category, AttachMoney, Percent, Sell, Storefront, Style } from "@mui/icons-material";
 import { Controller } from "react-hook-form";
 import ConfirmDialog from "../../../components/ConfirmDialog";
 import { useFormularioProducto } from "../hook/useFormularioProducto";
