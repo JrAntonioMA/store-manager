@@ -64,7 +64,7 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                     <Form.Label>Nombre del producto *</Form.Label>
                                     <InputGroup>
                                         <InputGroup.Text className="bg-transparent border-end-0">
-                                            <Storefront style={{ color: "#8e7970" }} />
+                                            <i className="bi bi-shop" style={{ color: "#8e7970" }}></i>
                                         </InputGroup.Text>
                                         <Form.Control
                                             {...register("title")}
@@ -87,7 +87,7 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                             <>
                                                 <InputGroup>
                                                     <InputGroup.Text className="bg-transparent border-end-0">
-                                                        <Category style={{ color: "#8e7970" }} />
+                                                        <i className="bi bi-tags" style={{ color: "#8e7970" }}></i>
                                                     </InputGroup.Text>
                                                     <Form.Select
                                                         {...field}
@@ -127,8 +127,6 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                                 e.target.checked ? "in-stock" : "out-of-stock"
                                             )
                                         }
-                                        className="text-dark"
-                                        style={{ color: "#0f1f38" }}
                                     />
                                 </Form.Group>
 
@@ -136,7 +134,7 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                     <Form.Label>Precio base *</Form.Label>
                                     <InputGroup>
                                         <InputGroup.Text className="bg-transparent border-end-0">
-                                            <AttachMoney style={{ color: "#8e7970" }} />
+                                            <i className="bi bi-currency-dollar" style={{ color: "#8e7970" }}></i>
                                         </InputGroup.Text>
                                         <Form.Control
                                             type="number"
@@ -156,7 +154,7 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                     <Form.Label>Stock total *</Form.Label>
                                     <InputGroup>
                                         <InputGroup.Text className="bg-transparent border-end-0">
-                                            <Inventory style={{ color: "#8e7970" }} />
+                                            <i className="bi bi-box-seam" style={{ color: "#8e7970" }}></i>
                                         </InputGroup.Text>
                                         <Form.Control
                                             type="number"
@@ -177,7 +175,7 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                     <Form.Label>Descuento (%)</Form.Label>
                                     <InputGroup>
                                         <InputGroup.Text className="bg-transparent border-end-0">
-                                            <Percent style={{ color: "#8e7970" }} />
+                                            <i className="bi bi-percent" style={{ color: "#8e7970" }}></i>
                                         </InputGroup.Text>
                                         <Form.Control
                                             type="number"
@@ -191,11 +189,13 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                             {errors.discountPercentage?.message}
                                         </Form.Control.Feedback>
                                     </InputGroup>
+
                                     {estados.advertenciaDescuento && (
                                         <Alert variant="warning" className="mt-2 py-1">
                                             Descuento superior al 50%
                                         </Alert>
                                     )}
+
                                     <div
                                         className="mt-3 p-3 bg-light rounded d-flex justify-content-between align-items-center"
                                         style={{ border: "1px solid #e0e4e8" }}
@@ -233,16 +233,17 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                                     onClick={() => remove(index)}
                                                     disabled={fields.length === 1}
                                                 >
-                                                    <Delete fontSize="small" />
+                                                    <i className="bi bi-trash"></i>
                                                 </Button>
                                             </div>
+
                                             <Row>
                                                 <Col md={12} className="mb-2">
                                                     <Form.Group>
                                                         <Form.Label>Nombre de la variante</Form.Label>
                                                         <InputGroup>
                                                             <InputGroup.Text className="bg-transparent border-end-0">
-                                                                <Style style={{ color: "#8e7970" }} />
+                                                                <i className="bi bi-palette" style={{ color: "#8e7970" }}></i>
                                                             </InputGroup.Text>
                                                             <Form.Control
                                                                 {...register(`variants.${index}.name`)}
@@ -256,22 +257,19 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                                         </InputGroup>
                                                     </Form.Group>
                                                 </Col>
+
                                                 <Col md={6} className="mb-2">
                                                     <Form.Group>
                                                         <Form.Label>Precio</Form.Label>
                                                         <InputGroup>
                                                             <InputGroup.Text className="bg-transparent border-end-0">
-                                                                <Sell style={{ color: "#8e7970" }} />
+                                                                <i className="bi bi-tag" style={{ color: "#8e7970" }}></i>
                                                             </InputGroup.Text>
                                                             <Form.Control
                                                                 type="number"
                                                                 step="0.01"
-                                                                {...register(`variants.${index}.price`, {
-                                                                    valueAsNumber: true,
-                                                                })}
-                                                                isInvalid={
-                                                                    !!errors.variants?.[index]?.price
-                                                                }
+                                                                {...register(`variants.${index}.price`, { valueAsNumber: true })}
+                                                                isInvalid={!!errors.variants?.[index]?.price}
                                                                 className="rounded-start-0"
                                                                 style={{ borderRadius: "0 8px 8px 0" }}
                                                             />
@@ -281,22 +279,19 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                                         </InputGroup>
                                                     </Form.Group>
                                                 </Col>
+
                                                 <Col md={6}>
                                                     <Form.Group>
                                                         <Form.Label>Stock</Form.Label>
                                                         <InputGroup>
                                                             <InputGroup.Text className="bg-transparent border-end-0">
-                                                                <Inventory style={{ color: "#8e7970" }} />
+                                                                <i className="bi bi-box" style={{ color: "#8e7970" }}></i>
                                                             </InputGroup.Text>
                                                             <Form.Control
                                                                 type="number"
                                                                 step="1"
-                                                                {...register(`variants.${index}.stock`, {
-                                                                    valueAsNumber: true,
-                                                                })}
-                                                                isInvalid={
-                                                                    !!errors.variants?.[index]?.stock
-                                                                }
+                                                                {...register(`variants.${index}.stock`, { valueAsNumber: true })}
+                                                                isInvalid={!!errors.variants?.[index]?.stock}
                                                                 disabled={estados.stockDeshabilitado}
                                                                 className="rounded-start-0"
                                                                 style={{ borderRadius: "0 8px 8px 0" }}
@@ -324,7 +319,7 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                                         borderRadius: "8px",
                                     }}
                                 >
-                                    <Add fontSize="small" /> Agregar variante
+                                    <i className="bi bi-plus-lg"></i> Agregar variante
                                 </Button>
 
                                 {tieneNombresVariantesDuplicados() && (
@@ -385,6 +380,7 @@ function ProductoForm({ producto, alExito, alCancelar, alCambioSinGuardar, fullW
                 textoConfirmar="Recuperar"
                 textoCancelar="Descartar"
             />
+
             <ConfirmDialog
                 abierto={salidaAbierto}
                 titulo="Cambios sin guardar"

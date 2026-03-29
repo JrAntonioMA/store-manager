@@ -44,8 +44,13 @@ function Usuarios() {
                     {cargandoConteo ? (
                         <div style={{ width: 32, height: 32, backgroundColor: "#e0e4e8", borderRadius: "50%" }}></div>
                     ) : (
-                        <Button variant="outline-secondary" size="sm" onClick={() => handleAbrirDrawer(usuario)} className="d-flex align-items-center gap-1">
-                            <ShoppingCart style={{ fontSize: 16 }} /> {conteo}
+                        <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            onClick={() => handleAbrirDrawer(usuario)}
+                            className="d-flex align-items-center gap-1"
+                        >
+                            <i className="bi bi-cart"></i> {conteo}
                         </Button>
                     )}
                 </td>
@@ -61,7 +66,9 @@ function Usuarios() {
                 <Row>
                     <Col md={12}>
                         <InputGroup>
-                            <InputGroup.Text><Search style={{ color: "#8e7970" }} /></InputGroup.Text>
+                            <InputGroup.Text>
+                                <i className="bi bi-search" style={{ color: "#8e7970" }}></i>
+                            </InputGroup.Text>
                             <Form.Control
                                 type="text"
                                 placeholder="Buscar por nombre o correo"
